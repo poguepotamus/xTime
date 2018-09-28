@@ -1,0 +1,2 @@
+source ~/envs/xTime/Scripts/activate
+alias leave="deactivate"
