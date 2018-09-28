@@ -122,3 +122,4 @@ src/
 .venv
 
 test.csv
+__pycache__/
