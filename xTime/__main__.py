@@ -104,10 +104,14 @@ class TimeCopy():
 	def __init__(self, arguments):
 		self._setup_setupHelp()
 
-		self.inputFile = None
-		self.outputFile = None
+		self._inputFile = None
+		self._format = "{Start date}\t{Client} - {Project}\t{Task}\t{Description}\t\t{Amount (USD)}"
+		self._copyToClipboard = False
+		self._outputFile = None
 
 		self._setup_getArguments(arguments)
+
+		self.formattedContent = self._getFileContent
 
 	def _setup_setupHelp(self):
 		self.helpMessage = (
@@ -117,47 +121,55 @@ class TimeCopy():
 
 	def _setup_getArguments(self, arguments):
 
-		### Input file
+		### Input file #################
 		try:
-			self.inputFile = arguments[1]
+			self._inputFile = arguments[1]
 		except IndexError:
 			self.printHelp()
 			exit()
+		del arguments[0:2]
 
-		### Tags
-		outputFileTags = ['-o', '--output', '--outputFile']
+		### Predefined Tags ############
+		outputFileTags       =  ['-o', '--output', '--outputFile']
+		copyToClipboardTags  =  ['-c', '--copy', '--clipboard']
+		formattingTag        =  ['-f', '--formatting', '--format']
 
-		while len(arguments) > 2:
+		### Setting tags from arguments #
+		while len(arguments) > 0:
 			### TAGS ###########################################################
-			if arguments[2][0] == '-':
-
-				### Output file ########
-				if arguments[2] in outputFileTags:
-					self.outputFile = arguments[3]
-					del arguments[3]
-
-				### Unknown tag ########
-				else:
-					try:
-						raise Exception(f'Unknown argument [{arguments[2]} {arguments[3]}].')
-					except IndexError:
-						raise Exception(f'Unknown argument [{arguments[2]}].')
-					exit()
+			# Output files #############
+			if arguments[0] in outputFileTags:
+				self._outputFiles = arguments[1]
+				del arguments[1]
 
 
-				del arguments[2]
+			# Formatting ###############
+			if arguments[0] in formattingTag:
+				self._format = arguments[1]
+				del arguments[1]
 
 
+			# Copy to clipboard ########
+			elif arguments[0] in copyToClipboardTags:
+				self._copyToClipboard = True
 
-			### ARGUMENTS ######################################################
 
-	def printHelp(self):
-		print(self.helpMessage)
+			# Unknown tags #############
+			else:
+				try:
+					raise Exception(f'Unknown argument [{arguments[0]} {arguments[1]}].')
+				except IndexError:
+					raise Exception(f'Unknown argument [{arguments[0]}].')
+				exit()
+
+
+			# Removing tag itself ######
+			del arguments[0]
 
 	def _getFileContent(self, inputFile=None):
 		# Default arguments
 		if inputFile is None:
-			inputFile = self.inputFile
+			inputFile = self._inputFile
 
 		### Getting file contents
 		header = None
@@ -166,12 +178,12 @@ class TimeCopy():
 		with open(inputFile, 'r') as inputFileContents:
 			for line in inputFileContents:
 				# Handling the header
-				if header = None:
-					header = [key.strip() for key in key.split(',')]
+				if header == None:
+					header = [key.strip() for key in line.split(',')]
 					continue
 
 				# If the header already exists
-				inputFileContentsList.append([key.strip() for key in key.split(',')])
+				inputFileContentsList.append([key.strip() for key in line.split(',')])
 
 		# Taking the file contents and storing it in a dictionary like format (almost like a table
 		inputFileTable = []
@@ -181,33 +193,46 @@ class TimeCopy():
 		# Returning this list of dictionaries
 		return inputFileTable
 
-	def _printToFile(self, outputFile=None):
+	def _writeToFile(self, outputFile=None):
 		# Default arguments
 		if outputFile is None:
 			outputFile = self.outputFile
 
 		# Printing to the outputFile
+		self.printFormattedContent()
 
+	def _getFormattedContent(self):
+		# Go through each line in the input file and format it
+		outputContent = ''
+		try:
+			for line in self.fileContents:
+				outputContent += self._format.format(**line) + '\n'
+		except KeyError as error:
+			print(f'FATAL ERROR: [{error}] is not a valid key in input format.')
+
+		return outputContent
+
+	def printHelp(self):
+		print(self.helpMessage)
+
+	def printFormattedContent(self):
+		print(self._formattedContent)
 
 	def execute(self):
 
 		# Finding input file and reading it in
 		self.fileContents = self._getFileContent()
 
+		# Getting the correct formatted content
+		self._formattedContent = self._getFormattedContent()
+
 		# Printing to outputFile is requested
-		if self.outputFile is not None:
+		if self._outputFile is not None:
 			self._printToFile()
 
-		header = None
-		with open(self.inputFile, 'r') as inputFile:
-			for line in inputFile:
-
-
-
-
-		raise NotImplementedError('TimeCopy.execute() is not implemented :(')
-
-
+		# Copying to clipboard if requested
+		if self._copyToClipboard:
+			pyperclip.copy(self._formattedContent)
 
 def main():
 	_ = TimeCopy(sys.argv)
