@@ -4,6 +4,7 @@
 
 import os, sys, re
 import pyperclip
+from tabulate import tabulate
 
 def getFileData(filename):
 	header == None
@@ -108,6 +109,7 @@ class TimeCopy():
 		self._format = "{Start date}\t{Client} - {Project}\t{Task}\t{Description}\t\t{Amount (USD)}"
 		self._copyToClipboard = False
 		self._outputFile = None
+		self._printToTerminal = False
 
 		self._setup_getArguments(arguments)
 
@@ -133,6 +135,7 @@ class TimeCopy():
 		outputFileTags       =  ['-o', '--output', '--outputFile']
 		copyToClipboardTags  =  ['-c', '--copy', '--clipboard']
 		formattingTag        =  ['-f', '--formatting', '--format']
+		printToTerminalTags  =  ['-p', '--print']
 
 		### Setting tags from arguments #
 		while len(arguments) > 0:
@@ -152,6 +155,11 @@ class TimeCopy():
 			# Copy to clipboard ########
 			elif arguments[0] in copyToClipboardTags:
 				self._copyToClipboard = True
+
+
+			# Print to terminal ########
+			elif arguments[0] in printToTerminalTags:
+				self._printToTerminal = True
 
 
 			# Unknown tags #############
@@ -203,10 +211,10 @@ class TimeCopy():
 
 	def _getFormattedContent(self):
 		# Go through each line in the input file and format it
-		outputContent = ''
+		outputContent = []
 		try:
 			for line in self.fileContents:
-				outputContent += self._format.format(**line) + '\n'
+				outputContent.append( self._format.format(**line) + '\n' )
 		except KeyError as error:
 			print(f'FATAL ERROR: [{error}] is not a valid key in input format.')
 
@@ -233,6 +241,11 @@ class TimeCopy():
 		# Copying to clipboard if requested
 		if self._copyToClipboard:
 			pyperclip.copy(self._formattedContent)
+
+		# Printing to the terminal if requested
+		if self._printToTerminal:
+			# print(type(self._formattedContent))
+			print('\n' + tabulate([line.split('\t') for line in self._formattedContent]) + '\n')
 
 def main():
 	_ = TimeCopy(sys.argv)
