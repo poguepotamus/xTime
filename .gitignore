@@ -123,3 +123,4 @@ src/
 
 test.csv
 __pycache__/
+.venv
