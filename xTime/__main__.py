@@ -11,7 +11,7 @@ class TimeCopy():
 		self._setup_setupHelp()
 
 		self._inputFile = 'Toggl_time_entries_2018-09-10_to_2018-09-16.csv'
-		self._format = "{Start date}\t{Client} - {Project}\t{Task}\t{Description}\t\t{Amount (USD)}"
+		self._format = "{Start date}\t{Client} - {Project}\t{Task}\t{Description}\t\t{Duration}"
 		self._copyToClipboard = False
 		self._outputFile = None
 		self._printToTerminal = False
