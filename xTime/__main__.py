@@ -105,11 +105,12 @@ class TimeCopy():
 	def __init__(self, arguments):
 		self._setup_setupHelp()
 
-		self._inputFile = None
+		self._inputFile = 'Toggl_time_entries_2018-09-10_to_2018-09-16.csv'
 		self._format = "{Start date}\t{Client} - {Project}\t{Task}\t{Description}\t\t{Amount (USD)}"
 		self._copyToClipboard = False
 		self._outputFile = None
 		self._printToTerminal = False
+		self._printLineCount = False
 
 		self._setup_getArguments(arguments)
 
@@ -136,6 +137,7 @@ class TimeCopy():
 		copyToClipboardTags  =  ['-c', '--copy', '--clipboard']
 		formattingTag        =  ['-f', '--formatting', '--format']
 		printToTerminalTags  =  ['-p', '--print']
+		linesTag             =  ['-l', '--lines', '--lineCount']
 
 		### Setting tags from arguments #
 		while len(arguments) > 0:
@@ -160,6 +162,11 @@ class TimeCopy():
 			# Print to terminal ########
 			elif arguments[0] in printToTerminalTags:
 				self._printToTerminal = True
+
+
+			# Output lines count #######
+			elif arguments[0] in linesTag:
+				self._printLineCount = True
 
 
 			# Unknown tags #############
@@ -227,6 +234,7 @@ class TimeCopy():
 		print(self._formattedContent)
 
 	def execute(self):
+		print()
 
 		# Finding input file and reading it in
 		self.fileContents = self._getFileContent()
@@ -234,18 +242,26 @@ class TimeCopy():
 		# Getting the correct formatted content
 		self._formattedContent = self._getFormattedContent()
 
-		# Printing to outputFile is requested
-		if self._outputFile is not None:
-			self._printToFile()
-
-		# Copying to clipboard if requested
-		if self._copyToClipboard:
-			pyperclip.copy(self._formattedContent)
+		# Printing line count if requested
+		if self._printLineCount:
+			print(f'{len(self._formattedContent)} lines were created.')
 
 		# Printing to the terminal if requested
 		if self._printToTerminal:
 			# print(type(self._formattedContent))
-			print('\n' + tabulate([line.split('\t') for line in self._formattedContent]) + '\n')
+			print(tabulate([line.split('\t') for line in self._formattedContent]))
+
+		# Printing to outputFile is requested
+		if self._outputFile is not None:
+			self._printToFile()
+			print(f'Output written to {self._outputFile} successfully.')
+
+		# Copying to clipboard if requested
+		if self._copyToClipboard:
+			pyperclip.copy(''.join(str(line) for line in self._formattedContent))
+			print('Output copied successfully.')
+
+		print()
 
 def main():
 	_ = TimeCopy(sys.argv)
