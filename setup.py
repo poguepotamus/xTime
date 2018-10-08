@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-	name='x_csvConvert',
+	name='xTime',
 	version='0.1',
 	author='Matthew Pogue',
 	author_email='matthewpogue606@gmail.com',
