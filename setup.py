@@ -12,7 +12,8 @@ setup(
 	packages=find_packages(),
 	classifiers=(
 		"Programming Language :: Python :: 3.7",
-		"Operating System :: Os Independent",
+		"Programming Language :: Python :: 3.6",
+		"Operating System :: OS Independent",
 	),
 	install_requires=[
 		'pyperclip',
